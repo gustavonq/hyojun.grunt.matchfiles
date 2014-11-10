@@ -53,7 +53,7 @@ exports.list_files = function (config, done, grunt) {
 			return;
 		}
 
-		var branch = grunt.option("branch");
+		var branch = grunt.option("branch") || grunt.option("b");
 		if (!!branch){
 			config.url = config.url.replace("{{branch}}", branch);
 		}
@@ -85,7 +85,7 @@ exports.list_files = function (config, done, grunt) {
 					var foo = {
 						"path" : blob.path + "/" + value,
 						"host" : config.url,
-						"rev" : grunt.option("rev")
+						"rev" : grunt.option("rev") || grunt.option("r")
 					};
 					foo.url = foo.host + foo.path + (!!foo.rev ? ("@"+foo.rev) : "");
 					return foo;
