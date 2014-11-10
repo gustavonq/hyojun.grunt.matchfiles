@@ -13,13 +13,7 @@ module.exports = function(grunt) {
 		decoder        = new StringDecoder("utf8"),
 		forEach        = require("mout/array/forEach");
 
-	grunt.registerMultiTask('matchfiles', 'TODO.', function() {
-
-		// var	file_list = [],
-		// 	matches_to_inspect = [],
-		// 	report = [],
-		// 	VERBOSE_FILES = 1,
-		// 	VERBOSE_BOOLEAN = 2;
+	grunt.registerMultiTask('matchfiles', 'Match files against svn/git and hosted files. -b for branch name and -r for revision', function() {	
 
 		var config = mixIn({
 			hosts : null,
