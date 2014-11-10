@@ -57,11 +57,11 @@ Use this object when your project is being versioned by SVN.
 
 * `url` String
 
-	The svn url. To avoid creating multiplus target because of branches, you can provite the branch you want to inspect by providing the argument `-b`, i.e.:
+	The svn url. To avoid creating multiplus target because of branches, you can provite the branch you want to inspect by providing the argument `-branch`, i.e.:
 
 	`grunt matchfiles:desktop -b FOO`
 
-	To set a specific revision you can provide this info by `-r` argument, i.e.:
+	To set a specific revision you can provide this info by `-rev` argument, i.e.:
 
 	`grunt matchfiles:desktop -b FOO -r 123`
 
