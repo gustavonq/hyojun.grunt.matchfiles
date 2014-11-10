@@ -1,13 +1,6 @@
 /*
  * grunt-checkfile
- * https://github.com/hankpillow/grunt-checkfile
-
-,
-					"static2" : "http://static2.netshoes.net",
-					"static3" : "http://static3.netshoes.net",
-					"static4" : "http://static4.netshoes.net",
-					"static5" : "http://static5.netshoes.net"
-
+ * https://github.com/hankpillow/grunt-matchfiles
  */
 module.exports = function(grunt) {
 'use strict';
