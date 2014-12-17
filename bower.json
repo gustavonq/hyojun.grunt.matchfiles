@@ -1,0 +1,14 @@
+{
+  "name": "hyojun.grunt.matchfiles",
+  "version": "0.1.0",
+  "homepage": "https://bitbucket.org/fbiz/hyojun.grunt.matchfiles",
+  "authors": [
+    "ialmeida@fbiz.com.br"
+  ],
+  "description": "match files from git/svn with hosted ones",
+  "keywords": [
+    "grunt"
+  ],
+  "license": "MIT",
+  "private": true
+}
