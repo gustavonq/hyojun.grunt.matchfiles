@@ -21,7 +21,7 @@
     "url": "https://bitbucket.org/fbiz/hyojun.grunt.matchfiles/issues"
   },
   "homepage": "https://bitbucket.org/fbiz/hyojun.grunt.matchfiles",
-  "devDependencies": {
+  "dependencies": {
     "mout": "^0.10.0",
     "grunt-cli": "^0.1.13",
     "grunt": "^0.4.5",
