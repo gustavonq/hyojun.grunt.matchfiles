@@ -1,7 +1,3 @@
-/*
- * grunt-checkfile
- * https://github.com/hankpillow/grunt-checkfile
- */
 module.exports = function(grunt) {
 'use strict';
 
@@ -13,7 +9,7 @@ module.exports = function(grunt) {
 		decoder        = new StringDecoder("utf8"),
 		forEach        = require("mout/array/forEach");
 
-	grunt.registerMultiTask('matchfiles', 'Match files against svn/git and hosted files. -branch for branch name and -rev for revision', function() {	
+	grunt.registerMultiTask('matchfiles', 'Match files against svn/git and hosted files. -branch for branch name and -rev for revision', function() {
 
 		var config = mixIn({
 			hosts : null,
