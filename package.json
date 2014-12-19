@@ -2,7 +2,6 @@
   "name": "hyojun.grunt.matchfiles",
   "version": "0.1.2",
   "description": "grunt task to match files's md5 from git/svn with hosted files",
-  "files": ["tasks"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
