@@ -42,10 +42,5 @@ module.exports = function(grunt) {
 		}
 
 		local.list_files(cmd, config.git || config.svn, check_remote_files, grunt);
-
-		//local.list_files(cmd, config.git || config.svn, function(file_list){
-		//	local.check_md5(file_list, check_remote_files, grunt);
-		//}	,grunt);
-
 	});
 };
