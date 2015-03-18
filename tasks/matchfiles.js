@@ -30,19 +30,10 @@ module.exports = function(grunt) {
 
 		var done = this.async();
 
-		function svn_check_files (file_list) {
-			svn.check_md5(file_list, check_server_files, grunt);
-		}
-
-		function git_check_files (file_list) {
-			git.check_md5(file_list, function(list){
-				console.log("local md5:", list)
-			}, grunt);
-		}
-
-		function check_server_files (value) {
+		function check_remote_files (value) {
 			grunt.log.writeln(("\nMatching md5 across hosts (" + config.hosts.length + ")").yellow);
 			remote.check({
+				cmd : config.svn ? "svn" : "git",
 				files : value,
 				hosts : config.hosts
 			}, done, grunt);
@@ -50,10 +41,14 @@ module.exports = function(grunt) {
 
 		//better object inspection
 		if (!!config.svn) {
-			svn.list_files(config.svn, svn_check_files, grunt);
+			svn.list_files(config.svn, function(file_list){
+				svn.check_md5(file_list, check_remote_files, grunt);
+			}	,grunt);
 		}
 	 	else if (!!config.git){
-			git.list_files(config.git, git_check_files, grunt);
+			git.list_files(config.git, function(file_list){
+				git.check_md5(file_list, check_remote_files, grunt);
+			}, grunt);
 		}
 
 

@@ -1,32 +1,31 @@
 exports.check = function (config, done, grunt) {
 //libs
-	var request = require("request"),
-		crypto  = require('crypto'),
-		md5sum;
-	// 	StringDecoder  = require('string_decoder').StringDecoder,
-	// 	decoder        = new StringDecoder("utf8"),
-	// 	forEach        = require("mout/array/forEach"),
-	// 	map            = require("mout/array/map"),
-	// 	compact        = require("mout/array/compact");
-	// 	unique         = require("mout/array/unique");
-	// 	trim           = require("mout/string/trim");
+	var request = require("request");
+	var crypto  = require('crypto');
+	var md5sum;
 
 	if (!config){
 		grunt.fail.fatal("Missing hosts to test");
 		return;
 	}
 
-	var hosts = [], file_queue, ok, nok;
+	var hosts = [];
+	var	file_queue;
+	var ok;
+	var nok;
+	var rev = grunt.option("rev")||"";
+	var branch = grunt.option("branch")||"";
 
 	function check_host_file(host, blob){
 		var url = (host + blob.file),
 			checksum, passed;
 		request(url, function(error, resp, body){
-			if (error) {
-				grunt.log.writeln("[FAILED] file:" + url);
-			}
-			if ( !!resp && resp.statusCode !== 200){
-				grunt.log.writeln("  [FAILED] status: "+ resp.statusCode);
+			if (error || (!!resp && resp.statusCode !== 200)){
+				nok++;
+				var rep = [" ",
+									blob.md5,
+									"--------------" + resp.statusCode + "--------------",
+									blob.file].join(" ").red;
 			} else {
 				md5sum = crypto.createHash("md5");
 				md5sum.update(body);
@@ -40,29 +39,29 @@ exports.check = function (config, done, grunt) {
 					nok++;
 					rep = rep.red;
 				}
-				grunt.log.writeln(rep);
 			}
+			grunt.log.writeln(rep);
 			check_files(host);
 		});
 	}
 
 	function check_files(host){
 		if (!file_queue || !file_queue.length){
-			grunt.log.writeln("---");
-			grunt.log.writeln((ok + " files passed").green);
-			grunt.log.writeln((nok + " files failed").red);
+			grunt.log.writeln("_____________________".grey);
+			grunt.log.writeln((ok + " file(s) passed").green);
+			grunt.log.writeln((nok + " file(s) failed").red);
 			pick_host();
 			return;
 		}
 		check_host_file(host, file_queue.shift());
 	}
 
-	function inspect_list(item){
-		grunt.log.writeln(("- " + item).magenta);
-		grunt.log.writeln("  svn/git                          host                             file".grey);
+	function inspect_list(url) {
+		grunt.log.writeln("- " + url);
+		grunt.log.writeln(("  ("+config.cmd+")                            (hosted)                        (file)").grey);
 		file_queue = [].concat(config.files);
 		ok = 0; nok = 0;
-		check_files(item);
+		check_files(url);
 	}
 
 	function pick_host () {
@@ -74,8 +73,12 @@ exports.check = function (config, done, grunt) {
 		inspect_list(hosts.shift());
 	}
 
-	for (var h in config.hosts){
-		hosts.push(config.hosts[h]);
+	for (var index in config.hosts){
+		var host = config.hosts[index]
+				host = host
+								.replace(/{{rev}}/gm,rev)
+								.replace(/{{branch}}/gm, branch);
+		hosts.push(host);
 	}
 
 	pick_host();
