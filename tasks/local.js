@@ -16,6 +16,7 @@ exports.list_files = function (type, config, done, grunt) {
 	var file_list = [];
 	var	rev = grunt.option("rev") || "HEAD";
 	var	branch = grunt.option("branch") || "trunk";
+	var reports = [];
 
 	grunt.log.writeln(("Listing " + type + " files:").yellow);
 
@@ -34,12 +35,11 @@ exports.list_files = function (type, config, done, grunt) {
 	});
 
 	function notify_local_done () {
-		if (!file_list || !!file_list && !file_list.length){
+		if (!reports || !!reports && !reports.length){
 			grunt.fail.fatal("No file to check!");
 			return;
 		}
-		done(file_list);
-		//check_md5(file_list, done, grunt);
+		done(reports);
 	}
 
 	function get_cmd_for(cmd, blob){
@@ -59,7 +59,10 @@ exports.list_files = function (type, config, done, grunt) {
 		return bash;
 	}
 
-	function inspect_next_path () {
+	function inspect_next_path (rep) {
+		if (rep){
+			reports = reports.concat(rep);
+		}
 		if (!!path_to_list && !path_to_list.length) {
 			grunt.log.writeln("_____________________".grey);
 			notify_local_done();
@@ -124,7 +127,7 @@ exports.list_files = function (type, config, done, grunt) {
 			} else {
 				grunt.log.writeln(("(0) matching " + (blob.match||"") + " under: " + blob.path).red);
 			}
-			check_md5(file_list, inspect_next_path.bind(this), grunt)
+			check_md5(type, file_list, inspect_next_path.bind(this), grunt)
 		});
 	}
 
@@ -132,31 +135,29 @@ exports.list_files = function (type, config, done, grunt) {
 
 };
 
-function check_md5 (file_list, done, grunt) {
+function check_md5 (type, file_list, done, grunt) {
 "use strict";
 	var spawn = require("child_process").spawn;
+	var queue =  [].concat(file_list);
+  var report = [];
 	var md5sum;
-	var queue =  [].concat(file_list), report = [];
 
-	function get_cmd_for(cmd, blob){
+	function get_cat_cmd(cmd, blob){
 		var bash;
 		var	args;
 		if (cmd === "git") {
 			args = ["show", blob.rev + ":" + blob.file];
 		} else{
-			args = ["cat", blob.file + (blob.rev ? "@"+blob.rev : "")];
+			args = ["cat", blob.file, "-r", blob.rev];
 		}
-		//grunt.log.writeln([cmd, args.join(" ")].join(" ").grey);
-		try { bash = spawn(cmd, args);
-		} catch (err) { grunt.log.writeln(err);
-			return null;
-		}
+		try { bash = spawn(cmd, args); }
+		catch (err) { console.log(err); return null; }
 		return bash;
 	}
 
 	function cat_file (item) {
 
-		var cmd = get_cmd_for("git", item);
+		var cmd = get_cat_cmd(type, item);
 		var hash = "";
 
 		if (!cmd){
@@ -173,12 +174,12 @@ function check_md5 (file_list, done, grunt) {
 		});
 
 		cmd.stderr.on("data", function (data) {
-			grunt.log.writeln(("("+report.length+"/"+file_list.length+") " + item.file + " @stderr: " + trim(data.toString())).red );
-				var blob = {
-					file : item.path,
-					md5 : "--------------------------------"
-				};
-				report.push(blob);
+			grunt.log.writeln(("("+report.length+"/"+file_list.length+") @stderr: " + trim(data.toString())).red );
+				//var blob = {
+				//	file : item.file,
+				//	md5 : "--------------------------------"
+				//};
+				//report.push(blob);
 			return;
 		});
 
