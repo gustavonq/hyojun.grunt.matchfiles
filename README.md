@@ -10,18 +10,7 @@ grunt.initConfig({
 	"matchfiles" : {
 		"desktop": {
 			"hosts" : ["http://static1.my-project.com","http://static2.my-project.com"],
-			"svn" : {
-				"url" : "http://my-svn-project.com/{{branch}}/desktop",
-				"inspect" : [{
-					"path" : "/assets/js-min",
-					"match" : "\.js$"
-				}]
-			}
-		},
-		"mobile": {
-			"hosts" : ["http://static3.my-project.com"],
-			"svn" : {
-				"url" : "http://my-svn-project.com/{{branch}}/mobile",
+			"git" : {
 				"inspect" : [{
 					"path" : "/assets/js-min",
 					"match" : "\.js$"
@@ -38,32 +27,22 @@ The `matchfiles` is [multitask](http://gruntjs.com/api/grunt.task) so the first 
 
 Each target allows you to define the a svn or git repository.
 
-###config.svn
+###config.[svn/git]
 
 Use this object when your project is being versioned by SVN.
 
 ```js
 {
-	"url" : "http://my-svn-project.com/{{branch}}/mobile",
 	"inspect" : [{
 		"path" : "/assets/js/dist/",
 		"match" : "\.js$"
 	},{
 		"path" : "/assets/css-min",
 		"match" : "\.css$"
-	},...]
+	},
+	...]
 }
 ```
-
-* `url` String
-
-	The svn url. To avoid creating multiplus target because of branches, you can provite the branch you want to inspect by providing the argument `-branch`, i.e.:
-
-	`grunt matchfiles:desktop -b FOO`
-
-	To set a specific revision you can provide this info by `-rev` argument, i.e.:
-
-	`grunt matchfiles:desktop -b FOO -r 123`
 
 * `inspect` Array
 
@@ -73,12 +52,12 @@ Use this object when your project is being versioned by SVN.
 
 	```js
 	{
-		"path" : "/assets/js/dist/",
-		"match" : "\.js$"
+		"path" : "path-to-inpect",
+		"match" : "regex to match files"
 	}
 	```
 
-	* `path` : the trailing path that will be applied on `url` to list (`svn ls`) the files.
+	* `path` : the trailing path that will be applied when listing files (`svn = svn ls`, `git = git ls-tree`) 
 
 	* `match`: a String that will be tested as regex on files, by this way you can define the sort/range of files you want to list.
 
@@ -87,3 +66,13 @@ Use this object when your project is being versioned by SVN.
 This is an Array of hosts you want to check if the files on "svn/git" are matching.
 
 If you have a host `http://foo.com` and you are listing the files (svn or git) on `/assets/foo/*.js`, this means that we will try to find/checksum the files on `http://foo.com/assets/foo/*.js`
+
+> for urls we have wildcards called {{branch}} and {{rev}}, that will be filled with command line arguments:
+	
+```js
+grunt matchfiles:git-target -rev SHA1 
+//or
+grunt matchfiles:svn-target -rev 123 -branch hot-fix
+```
+
+

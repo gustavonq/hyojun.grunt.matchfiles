@@ -1,14 +1,13 @@
 {
-  "name": "grunt-grep-pattern",
-  "version": "0.1.0",
-  "description": "simple grunt task to grep the results from a pattern into file/folder",
-  "files": ["tasks"],
+  "name": "hyojun.grunt.matchfiles",
+  "version": "0.1.3",
+  "description": "grunt task to match files's md5 from git/svn with hosted files",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hankpillow/grunt-grep-pattern.git"
+    "url": "https://bitbucket.org/fbiz/hyojun.grunt.matchfiles.git"
   },
   "keywords": [
     "grunt",
@@ -21,7 +20,7 @@
     "url": "https://bitbucket.org/fbiz/hyojun.grunt.matchfiles/issues"
   },
   "homepage": "https://bitbucket.org/fbiz/hyojun.grunt.matchfiles",
-  "devDependencies": {
+  "dependencies": {
     "mout": "^0.10.0",
     "grunt-cli": "^0.1.13",
     "grunt": "^0.4.5",
