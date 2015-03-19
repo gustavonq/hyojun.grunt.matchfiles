@@ -32,26 +32,27 @@ grunt.loadNpmTasks('hyojun.grunt.matchfiles');
 
 ##config
 
-```
-	"matchfiles" : {
-		"desktop": {
-			"hosts" : [String, String, ...]
-			"git" : {
-				"inspect" : [{
-					"path" : String, 
-					"match" : String
-				}]
-			},
-			"svn" : {
-				"inspect" : [{
-					"path" : String, 
-					"match" : String
-				}]
-			}
-		}
-```
-
 The `matchfiles` is [multitask](http://gruntjs.com/api/grunt.task) so the first level of the config defines just the target that will be used.
+
+```js
+"matchfiles" : {
+	"desktop": {
+		"hosts" : [String, String, ...]
+		"git" : {
+			"inspect" : [{
+				"path" : String, 
+				"match" : String
+			}]
+		},
+		"svn" : {
+			"inspect" : [{
+				"path" : String, 
+				"match" : String
+			}]
+		}
+	}
+}
+```
 
 ###hosts
 
