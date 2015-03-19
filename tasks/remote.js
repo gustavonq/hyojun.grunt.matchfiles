@@ -15,6 +15,7 @@ exports.check = function (config, done, grunt) {
 	var nok;
 	var rev = grunt.option("rev") || "HEAD";
 	var branch = grunt.option("branch")||"";
+
 	var opt = null;
 	var user = grunt.option("user");
 	var pass = grunt.option("pass") || grunt.option("password");
