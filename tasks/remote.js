@@ -13,7 +13,7 @@ exports.check = function (config, done, grunt) {
 	var	file_queue;
 	var ok;
 	var nok;
-	var rev = grunt.option("rev")||"";
+	var rev = grunt.option("rev") || "HEAD";
 	var branch = grunt.option("branch")||"";
 
 	function check_host_file(host, blob){
