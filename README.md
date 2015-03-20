@@ -1,13 +1,13 @@
 grunt-matchfiles
 ==================
-*version*: **0.2.2**
+*version*: **0.2.3**
 
 grunt task designed to list files on svn/git repo, grab the md5 hash and compare those into a list of remote hosts. Good for making sure that you versioned code is the same you have on remote hosts.
 
 ##install
 
 ```bash
-npm install https://bitbucket.org/fbiz/hyojun.grunt.matchfiles/get/0.2.1.tar.gz --save-dev
+npm install https://bitbucket.org/fbiz/hyojun.grunt.matchfiles/get/0.2.3.tar.gz --save-dev
 ```
 
 ##usage

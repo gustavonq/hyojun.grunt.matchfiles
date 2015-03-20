@@ -1,6 +1,5 @@
 var
 		StringDecoder  = require('string_decoder').StringDecoder,
-		decoder        = new StringDecoder("utf8"),
 		forEach        = require("mout/array/forEach"),
 		map            = require("mout/array/map"),
 		compact        = require("mout/array/compact"),
@@ -13,9 +12,8 @@ exports.list_files = function (type, config, done, grunt) {
 
 	var spawn = require("child_process").spawn;
 	var path_to_list = [];
-	var file_list = [];
 	var	rev = grunt.option("rev") || "HEAD";
-	var	branch = grunt.option("branch") || "trunk";
+	var	branch = grunt.option("branch") || "";
 	var reports = [];
 
 	grunt.log.writeln(("Listing " + type + " files:").yellow);
@@ -60,7 +58,7 @@ exports.list_files = function (type, config, done, grunt) {
 	}
 
 	function inspect_next_path (rep) {
-		if (rep){
+		if (rep) {
 			reports = reports.concat(rep);
 		}
 		if (!!path_to_list && !path_to_list.length) {
@@ -68,10 +66,10 @@ exports.list_files = function (type, config, done, grunt) {
 			notify_local_done();
 			return;
 		}
-		list_files(path_to_list.pop());
+		list_files(path_to_list.pop(),[]);
 	}
 
-	function list_files (blob) {
+	function list_files (blob, filtered_list) {
 
 		if (!blob){
 			grunt.fail.fatal("got invalid blob to inspect");
@@ -79,16 +77,21 @@ exports.list_files = function (type, config, done, grunt) {
 		}
 
 		var cmd = get_cmd_for(type, blob);
-		var filtered_list = [];
+		var chunk = "";
 
 		cmd.stdout.on("data", function (data) {
+			if (!data) { grunt.fail.fatal("stdout:: failed to list files on: '" + blob.path + "'");}
+			chunk += data.toString();
+		});
 
-			if (!data) {
-				grunt.fail.fatal("stdout:: failed to list files one '" + blob.path + "'");
-				return;
-			}
+		cmd.stderr.on("data", function (data) {
+			grunt.log.writeln(data);
+			grunt.fail.fatal("stderr:: failed to list files '" + blob.path + "'");
+		});
 
-			filtered_list = decoder.write(data).split("\n");
+		cmd.on('close', function () {
+
+			filtered_list = chunk.split("\n");
 			filtered_list = map(filtered_list, function (value) {
 
 				value = trim(value || "");
@@ -97,6 +100,11 @@ exports.list_files = function (type, config, done, grunt) {
 					var asset_path = blob.path;
 							asset_path += !!asset_path.match(/\/$/) ? "" : "/";
 							asset_path = type === "git" ? "" : asset_path;
+
+					if (!grunt.file.exists(asset_path + value)){
+						console.log("got a path that doesnt exists:" , asset_path + value);
+						return null;
+					}
 
 					var foo = {
 						"file" : asset_path + value,
@@ -110,24 +118,16 @@ exports.list_files = function (type, config, done, grunt) {
 				return null;
 			});
 
-			filtered_list = compact(filtered_list);
-			file_list = file_list.concat(filtered_list);
-		});
+			filtered_list = unique(compact(filtered_list));
 
-		cmd.stderr.on("data", function (data) {
-			grunt.log.writeln(data);
-			grunt.fail.fatal("stderr:: failed to list files '" + blob.path + "'");
-			return;
-		});
-
-		cmd.on('close', function () {
-			file_list = unique(filtered_list);
-			if (file_list.length){
-				grunt.log.writeln(("("+file_list.length+") matching " + (blob.match||"") + " under: " + blob.path).green);
-			} else {
+			if (filtered_list.length) {
+				grunt.log.writeln(("("+filtered_list.length+") matching " + (blob.match||"") + " under: " + blob.path).green);
+			}
+			else {
 				grunt.log.writeln(("(0) matching " + (blob.match||"") + " under: " + blob.path).red);
 			}
-			check_md5(type, file_list, inspect_next_path.bind(this), grunt)
+			grunt.log.writeln("- Checking md5 by revision, it can take a while.".yellow);
+			check_md5(type, filtered_list, inspect_next_path.bind(this), grunt);
 		});
 	}
 
@@ -170,17 +170,16 @@ function check_md5 (type, file_list, done, grunt) {
 				grunt.fail.fatal("stdout:: failed to list files on: '" + item.file + "'");
 				return;
 			}
-			hash += decoder.write(data);
+			hash += data.toString();
 		});
 
 		cmd.stderr.on("data", function (data) {
-			grunt.log.writeln(("("+report.length+"/"+file_list.length+") @stderr: " + trim(data.toString())).red );
-				//var blob = {
-				//	file : item.file,
-				//	md5 : "--------------------------------"
-				//};
-				//report.push(blob);
-			return;
+			grunt.log.writeln(("@stderr: " + trim(data.toString())).red );
+			var blob = {
+				file : item.file,
+				md5 : "--------------------------------"
+			};
+			grunt.log.writeln([blob.md5.red, item.file].join(" "));
 		});
 
 		cmd.on('close', function () {
@@ -195,7 +194,9 @@ function check_md5 (type, file_list, done, grunt) {
 				};
 
 				report.push(blob);
-				grunt.log.writeln([blob.md5.grey, item.file].join(" "));
+				if (grunt.option("verbose")){
+					grunt.log.writeln([blob.md5.grey, item.file].join(" "));
+				}
 			}
 			hash = null;
 			check_next_file();
