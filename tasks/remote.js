@@ -16,33 +16,79 @@ exports.check = function (config, done, grunt) {
 	var rev = grunt.option("rev") || "HEAD";
 	var branch = grunt.option("branch")||"";
 
-	function check_host_file(host, blob){
-		var url = (host + blob.file),
-			checksum, passed;
-		request(url, function(error, resp, body){
-			if (error || (!!resp && resp.statusCode !== 200)){
-				nok++;
-				var rep = [" ",
-									blob.md5,
-									"--------------" + resp.statusCode + "--------------",
-									blob.file].join(" ").red;
-			} else {
-				md5sum = crypto.createHash("md5");
-				md5sum.update(body);
-				checksum  = md5sum.digest('hex');
-				passed = checksum === blob.md5;
-				var rep = [" ", blob.md5, checksum, blob.file].join(" ");
-				if (passed) {
-					ok++;
-					rep = rep.green;
-				} else {
-					nok++;
-					rep = rep.red;
-				}
+	var opt = null;
+	var user = grunt.option("user");
+	var pass = grunt.option("pass") || grunt.option("password");
+
+	if (!!user){
+		opt = {
+			"auth" : {
+				"user" : user,
+				"pass" : pass
 			}
-			grunt.log.writeln(rep);
+		}
+	}
+
+	function check_host_file (host, blob){
+
+		var url = (host + blob.file);
+		var checksum;
+		var	passed;
+
+		function log_report(value){
+			grunt.log.writeln(value);
 			check_files(host);
-		});
+		}
+
+		request.get(url, opt)
+
+			.on("error", function(err){
+
+				grunt.log.writeln(("Error fetching url:"+url).red);
+				grunt.log.writeln("check if your host is expecting user and password");
+				grunt.fail.fatal(err);
+				done();
+
+			})
+
+			.on("response", function (resp) {
+				var rep = "couldn't create report for:" + url;
+
+				if (resp.statusCode === 200){
+					resp.on("data", function (chunk) {
+
+						md5sum = crypto.createHash("md5");
+						md5sum.update(chunk.toString());
+						checksum  = md5sum.digest('hex');
+						passed = checksum === blob.md5;
+
+						rep = [
+							blob.md5,
+							checksum,
+							blob.file
+						].join(" ");
+
+						if (passed) { ok++; rep = rep.green; }
+						else { nok++; rep = rep.red; }
+
+						log_report(rep);
+
+					});
+
+				} else {
+
+					nok++;
+					rep = [
+						blob.md5,
+						"--------------" + resp.statusCode + "--------------",
+						blob.file
+					].join(" ").red;
+
+					log_report(rep);
+				}
+
+			});
+
 	}
 
 	function check_files(host){
@@ -58,7 +104,7 @@ exports.check = function (config, done, grunt) {
 
 	function inspect_list(url) {
 		grunt.log.writeln("- " + url);
-		grunt.log.writeln(("  ("+config.cmd+")                            (hosted)                        (file)").grey);
+		grunt.log.writeln(("("+config.cmd+")                            (hosted)                        (file)").grey);
 		file_queue = [].concat(config.files);
 		ok = 0; nok = 0;
 		check_files(url);
