@@ -55,10 +55,16 @@ exports.check = function (config, done, grunt) {
 				var rep = "couldn't create report for:" + url;
 
 				if (resp.statusCode === 200){
+					var partial = "";
+
 					resp.on("data", function (chunk) {
+						partial+=chunk.toString();
+					});
+
+					resp.on("end", function(){
 
 						md5sum = crypto.createHash("md5");
-						md5sum.update(chunk.toString());
+						md5sum.update(partial);
 						checksum  = md5sum.digest('hex');
 						passed = checksum === blob.md5;
 
@@ -80,7 +86,7 @@ exports.check = function (config, done, grunt) {
 					nok++;
 					rep = [
 						blob.md5,
-						"--------------" + resp.statusCode + "--------------",
+						"--------------" + resp.statusCode + "---------------",
 						blob.file
 					].join(" ").red;
 
@@ -102,7 +108,7 @@ exports.check = function (config, done, grunt) {
 		check_host_file(host, file_queue.shift());
 	}
 
-	function inspect_list(url) {
+	function inspect_host(url) {
 		grunt.log.writeln("- " + url);
 		grunt.log.writeln(("("+config.cmd+")                            (hosted)                        (file)").grey);
 		file_queue = [].concat(config.files);
@@ -116,7 +122,7 @@ exports.check = function (config, done, grunt) {
 			done();
 			return;
 		}
-		inspect_list(hosts.shift());
+		inspect_host(hosts.shift());
 	}
 
 	for (var index in config.hosts){
