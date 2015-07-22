@@ -44,14 +44,14 @@ exports.list_files = function (type, config, done, grunt) {
 		var bash;
 		var	args;
 		if (cmd === "git") {
-			args = ["ls-tree", "-r", "--name-only", rev, "--", blob.path ];
+			args = ["ls-tree", "-r", "--name-only", "HEAD", "--", blob.path ];
 		} else {
 			args = ["ls", blob.path, "-r", rev];
 		}
 		grunt.log.writeln("_____________________".grey);
 		grunt.log.writeln([cmd, args.join(" ")].join(" ").grey);
 		try { bash = spawn(cmd, args);
-		} catch (err) { grunt.log.writeln(err);
+		} catch (err) { grunt.log.writeln("error listing local files\n" + err);
 			return null;
 		}
 		return bash;
@@ -146,7 +146,7 @@ function check_md5 (type, file_list, done, grunt) {
 		var bash;
 		var	args;
 		if (cmd === "git") {
-			args = ["show", blob.rev + ":" + blob.file];
+			args = ["show", "HEAD:" + blob.file];
 		} else{
 			args = ["cat", blob.file, "-r", blob.rev];
 		}

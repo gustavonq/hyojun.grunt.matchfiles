@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 				"git" : {
 					"inspect" : [{
 						"path" : "./",
-						"match" : "."
+						"match" : "\.js$"
 					}]
 				}
 			}
